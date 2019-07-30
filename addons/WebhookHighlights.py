@@ -37,31 +37,16 @@ def callWebHookRead():
   current_status = STATUS_READ
   requests.post(url = URL_READ)
 
-def highlightFound():
-  callWebHookReceived()
-
-def messageRead():
-  callWebHookRead()
-
-def containsString(s1, s2):
-  if s1.lower().find(s2.lower()) != -1:
-    return True
-  return False
-
 def privateMessage(w, we, u):
-  global current_status
-  if current_status == STATUS_RECEIVED:
-    return None
   if alwaysNotifyForPrivate:
-    highlightFound()
+    callWebHookReceived()
   else:
     message(w,we,u)
 
 def message(w, we, u):
   message = w[1]
-  for el in highlights:
-    if containsString(message, el):
-      highlightFound()
+  if any(word in message for word in  highlights):
+    callWebHookReceived()
   
 def windowFocus(w, we, u):
   callWebHookRead()
