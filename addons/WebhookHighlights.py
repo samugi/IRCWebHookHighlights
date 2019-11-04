@@ -1,5 +1,5 @@
 __module_name__ = "WebhookHighlights"
-__module_version__ = "0.0.1"
+__module_version__ = "0.0.2"
 __module_description__ = "Send a Webhook request when certain highlighted words are detected in incoming messages"
 
 
@@ -21,14 +21,15 @@ def triggerRead(w, we, u):
   callWebHookRead()
 
 def triggerReceived(w, we, u):
-  callWebHookReceived()
+  callWebHookReceived(w[0], w[1])
 
-def callWebHookReceived():
+def callWebHookReceived(sender, message):
   global current_status
   if current_status == STATUS_RECEIVED:
     return None
   current_status = STATUS_RECEIVED
-  requests.post(url = URL_RECEIVED)
+  data = {"value1": sender, "value2": message}
+  requests.post(url = URL_RECEIVED, json=data)
 
 def callWebHookRead():
   global current_status
@@ -39,14 +40,14 @@ def callWebHookRead():
 
 def privateMessage(w, we, u):
   if alwaysNotifyForPrivate:
-    callWebHookReceived()
+    callWebHookReceived(w[0], w[1])
   else:
     message(w,we,u)
 
 def message(w, we, u):
   message = w[1]
   if any(word in message for word in  highlights):
-    callWebHookReceived()
+    callWebHookReceived(w[0], message)
   
 def windowFocus(w, we, u):
   callWebHookRead()
@@ -59,4 +60,3 @@ hexchat.hook_print("Focus Window", windowFocus)
 hexchat.hook_print("Channel Msg Hilight", message)
 hexchat.hook_command("trigger_received", triggerReceived)
 hexchat.hook_command("trigger_read", triggerRead)
-
